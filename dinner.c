@@ -1,159 +1,112 @@
 #include "philosophers.h"
 
-// Handles the thinking state of a philosopher
-void thinking(t_philos *philo, bool status)
-{
-    long t_eat;
-    long t_sleep;
-    long t_think;
-    if(!status)
-        write_status(THINKING, philo);
-    if(philo->data->philo_nbr % 2 == 0)
-        return;
-    t_eat = philo->data->time_to_eat;
-    t_sleep = philo->data->time_to_sleep;
-    t_think = t_eat * 2 - t_sleep;
-    if (t_think < 0)
-        t_think = 0;
-    percise_usleep(t_think * 0.42 ,philo->data);
-
-}
-
-void    *one_philo(void *arg)
+void *one_philo(void *arg)
 {
     t_philos *philo;
 
     philo = (t_philos *)arg;
-    wait_all_threads(philo->data);
-    pthread_mutex_lock(&philo->philo_mutex);
-    philo->last_meal_time = get_time(MILLISECOND);
+    all_threads_running(&philo->data->data_mutex, &philo->data->threads_running_nbr, philo->data->philo_nbr );
+    if(pthread_mutex_lock(&philo->data->data_mutex) != 0)
+        ft_error("Lone philo failed to lock mutex ", philo->data);
+    philo->last_meal_time = get_time(MILLISECOND, philo->data);
     philo->data->threads_running_nbr++;
-    pthread_mutex_unlock(&philo->data->data_mutex);
+    if(pthread_mutex_unlock(&philo->data->data_mutex) != 0)
+        ft_error("Lone philo failed to unlock mutex ", philo->data);
     write_status(TAKE_FIRST_FORK, philo);
-    while(!philo->data->end_time)
+    while (!end_time(philo->data, 0))
         usleep(200);
     return (NULL);
 }
 
-
 static void eat(t_philos *philo)
 {
-    // Attempt to lock the first fork
     if (pthread_mutex_lock(&philo->first_fork->fork) != 0) 
-    {
-        ft_error("Failed to lock first fork");
-    }
+        ft_error("Failed to lock first fork", philo->data);
     write_status(TAKE_FIRST_FORK, philo); 
-    // Attempt to lock the second fork
     if (pthread_mutex_lock(&philo->second_fork->fork) != 0) 
-    {
-        pthread_mutex_unlock(&philo->first_fork->fork);
-        ft_error("Failed to lock second fork");
-    }
+        ft_error("Failed to lock second fork", philo->data);
     write_status(TAKE_SECOND_FORK, philo);
-
-    // Update philosopher's last meal time
     pthread_mutex_lock(&philo->philo_mutex);
-    philo->last_meal_time = get_time(MILLISECOND);
+    philo->last_meal_time = get_time(MILLISECOND, philo->data);
     philo->meals_counter++;
-    pthread_mutex_unlock(&philo->philo_mutex);
-
-    // Report the eating status
     write_status(EATING, philo);
-
-    // Simulate the eating process
+    pthread_mutex_unlock(&philo->philo_mutex);
     percise_usleep(philo->data->time_to_eat, philo->data);
-
-    // Update the full status if needed
     if (philo->data->meals_limit > 0 && philo->meals_counter == philo->data->meals_limit)
     {
         pthread_mutex_lock(&philo->philo_mutex);
         philo->full = true;
         pthread_mutex_unlock(&philo->philo_mutex);
     }
-
     if(pthread_mutex_unlock(&philo->first_fork->fork) != 0)
-    {
-        ft_error("failed to unlock first fork");
-    }
+        ft_error("failed to unlock first fork", philo->data);
     if(pthread_mutex_unlock(&philo->second_fork->fork) != 0)
-    {
-        ft_error("failed to unlock second fork");
-    }
+        ft_error("failed to unlock second fork", philo->data);
 }
 
 void dinner_start(t_data *data)
 {
-    int i;
-    int result;
-
     if (data->meals_limit == 0)
-        return;
-    else if(data->philo_nbr == 1)
+        return ;
+    if(data->philo_nbr == 1)
     {
-        pthread_create(&data->philos[0].thread_id, NULL, one_philo, &data->philos[0]);
+        if (pthread_create(&data->philos[0].thread_id, NULL, one_philo, &data->philos[0]) != 0)
+            perror("Failed to create one_philo thread");
+        if (pthread_join(data->philos[0].thread_id, NULL) != 0)
+            perror("Failed to join one_philo thread");
     }
     else
-    {
-        for(i = 0; i < data->philo_nbr; i++)
-        {
-            result = pthread_create(&data->philos[i].thread_id, NULL, dinner_simulation, &data->philos[i]);
-            if (result != 0)
-                ft_error("pthread_create failed");
-        }
-
-        pthread_create(&data->monitor, NULL, monitor_dinner, data );
-        data->start_time = get_time(MILLISECOND);
-
-        pthread_barrier_wait(&data->barrier2);
-
-        for (i = 0; i < data->philo_nbr; i++)
-        {
-            result = pthread_join(data->philos[i].thread_id, NULL);
-            if (result != 0)
-                ft_error("pthread_join failed");
-        }
-        pthread_mutex_lock(&data->data_mutex);
-        data->end_time = true;
-        pthread_mutex_unlock(&data->data_mutex);
-        pthread_join(data->monitor, NULL);
-    }
+        more_than_one_philo(data);
 }
 
 void *dinner_simulation(void *data) 
 {
-    t_philos *philo = (t_philos *)data;
+    t_philos *philo;
 
-    printf("Thread %d started.\n", philo->id);
-
-    thread_ready(philo);
-    wait_all_threads(philo->data);
-
-    //pthread_barrier_wait(&philo->data->barrier);
-
+    philo = (t_philos *)data;
+    all_threads_running(&philo->data->data_mutex, &philo->data->threads_running_nbr, philo->data->philo_nbr );
+    set_start_time(philo);
     if (pthread_mutex_lock(&philo->data->data_mutex) != 0)
-    {
-        ft_error("Failed to lock data_mutex for last meal time");
-    }
-    philo->last_meal_time = get_time(MILLISECOND);
-    philo->data->threads_running_nbr++;
+        ft_error("Failed to lock data_mutex for last meal time", data);
+    philo->last_meal_time = get_time(MILLISECOND, data);
     if(pthread_mutex_unlock(&philo->data->data_mutex) != 0)
-    {
-        ft_error("Failed to unlock data_mutex for number of threads running");
-    }
-
-    while (!philo->data->end_time) 
+        ft_error("Failed to unlock data_mutex for number of threads running", data);
+    while (!end_time(philo->data, 0)) 
     {
         if (philo->full) 
         {
-            printf("Thread %d is full and exiting.\n", philo->id);
-            break;
+            printf("Thread %d is full.\n", philo->id);
+            break ;
         }
         eat(philo);
         write_status(SLEEPING, philo);
         percise_usleep(philo->data->time_to_sleep, philo->data);
         thinking(philo, false );
     }
-    printf("Thread %d finished dinner simulation.\n", philo->id);
-    return NULL;
+    return (NULL);
+}
+
+void more_than_one_philo(t_data *data) 
+{
+    int i;
+    
+    i = 0;
+    while (i < data->philo_nbr) 
+    {
+        if (pthread_create(&data->philos[i].thread_id, NULL, dinner_simulation, &data->philos[i]))
+            ft_error("pthread_create failed", data);
+        i++;
+    }
+    pthread_create(&data->monitor, NULL, monitor_dinner, data);
+    all_threads_running(&data->data_mutex, &data->threads_running_nbr, data->philo_nbr);
+    i = 0;
+    while (i < data->philo_nbr)
+    {
+        if (pthread_join(data->philos[i].thread_id, NULL) != 0)
+            ft_error("pthread_join failed for philosopher", data);
+        i++;
+    }
+    end_time(data, 1);
+    if (pthread_join(data->monitor, NULL) != 0)
+        ft_error("pthread_join failed for monitor", data);
 }

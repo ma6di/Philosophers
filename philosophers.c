@@ -6,11 +6,7 @@ int main(int argc, char **argv)
 
     data = (t_data *)malloc(sizeof(t_data));
     if (!data)
-    {
-        ft_error("Memory allocation failed");
-    }
-
-    // Initialize data and handle errors
+        ft_error("Memory allocation failed", data);
     if (argc == 5 || argc == 6)
     {
         input_pars(data, argv, argc);
@@ -20,11 +16,7 @@ int main(int argc, char **argv)
         clean(data);
     }
     else
-    {
-        free(data);
-        ft_error("Wrong number of arguments");
-    }
-
+        ft_error("Wrong number of arguments", data);
     free(data);
-    return 0;
+    return (0);
 }

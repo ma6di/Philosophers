@@ -1,63 +1,50 @@
 #include "philosophers.h"
 
-long get_time(t_time_code time_code)
+long get_time(t_time_code time_code, t_data *data)
 {
 
     struct timeval tv;
+    long time_in_usec;
+
     if (gettimeofday(&tv, NULL))
-        ft_error("gettimeofday failed");
-
-    long time_in_usec = (tv.tv_sec * 1000000) + tv.tv_usec;
-
+        ft_error("gettimeofday failed", data);
+    time_in_usec = (tv.tv_sec * 1000000) + tv.tv_usec;
     if (time_code == SECOND)
-        return time_in_usec / 1000000;
+        return (time_in_usec / 1000000);
     if (time_code == MILLISECOND)
-        return time_in_usec / 1000;
+        return (time_in_usec / 1000);
     if (time_code == MICROSECOND)
-        return time_in_usec;
-    
-    ft_error("wrong input to get_time");
-    return -1; // Should never reach here due to the error call
+        return (time_in_usec);
+    ft_error("wrong input to get_time", data);
+    return (-1); 
 }
-void    percise_usleep(long usec, t_data *data) //try with usleep
+
+void    percise_usleep(long usec, t_data *data)
 {
     long    start;
     long    elapsed;
     long    rem;
 
-    start = get_time(MICROSECOND);
-    while (get_time(MICROSECOND) - start < usec )
+    start = get_time(MICROSECOND, data);
+    while (get_time(MICROSECOND, data) - start < usec )
     {
-        if(data->end_time)
+        if(end_time(data, 0))
             break;
-        elapsed = get_time(MICROSECOND) - start;
+        elapsed = get_time(MICROSECOND, data) - start;
         rem = usec - elapsed;
         if(rem > 1e6)
             usleep(rem / 2);
         else
         {
-            while (get_time(MICROSECOND) - start < usec )
+            while (get_time(MICROSECOND, data) - start < usec )
                 ;
         }
     }
 }
 
-/*void percise_usleep(long usec, t_data *data)
+void set_start_time(t_philos *philo)
 {
-
-    long start_time, elapsed_time;
-
-    start_time = get_time(MICROSECOND);
-    while (1)
-    {
-        if (data->end_time)
-            break;
-
-        elapsed_time = get_time(MICROSECOND) - start_time;
-        if (elapsed_time >= usec)
-            break;
-
-        // Sleep for a small fraction of the requested time to avoid busy-waiting
-        usleep((usec - elapsed_time > 1000) ? (usec - elapsed_time) / 2 : (usec - elapsed_time));
-    }
-}*/
+    pthread_mutex_lock(&philo->data->data_mutex);
+    philo->data->start_time = get_time(MILLISECOND, philo->data);
+    pthread_mutex_unlock(&philo->data->data_mutex);
+}

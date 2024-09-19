@@ -47,14 +47,10 @@ struct s_data
     long        meals_limit;
     long        start_time;
     long        threads_running_nbr;
-    long        threads_running_nbr2;
-    long        threads_running_nbr3;
-    pthread_barrier_t barrier;
-    pthread_barrier_t barrier2;
     bool        end_time;
-    bool        all_threads_ready;
     pthread_t   monitor;
     pthread_mutex_t data_mutex;
+    pthread_mutex_t end_mutex;
     pthread_mutex_t write_mutex;
     t_fork      *forks;
     t_philos    *philos;
@@ -77,30 +73,26 @@ typedef enum e_status
     DIED,
 }   t_status;
 
-void    ft_error(const char *error);
+void    ft_error(const char *error, t_data *data);
 void    input_pars(t_data *data, char **argv, int argc);
-long    ft_atol(const char *str);
 void    ft_int_max(long num);
 void    ft_mutex_init(t_data *data);
 void    ft_philo_init(t_data *data);
 void    ft_assign_fork(t_philos *philo, t_fork *forks, int position);
-void    wait_all_threads(t_data *data);
 void    dinner_start(t_data *data);
 void    *dinner_simulation(void *data);
-long    get_time(t_time_code time_code);
+long    get_time(t_time_code time_code, t_data *data);
 void    percise_usleep(long usec, t_data *data);
 void    write_status(t_status status, t_philos *philo);
-void input_parss(t_data *data, char **argv, int argc);
+void    input_parss(t_data *data, char **argv, int argc);
 bool    all_threads_running(pthread_mutex_t *mutex, long *threads, long philo_nbr);
 void    *monitor_dinner(void *data);
 void    *one_philo(void *arg);
-void thread_ready(t_philos *philo);
 void    clean(t_data *data);
-void thinking(t_philos *philo, bool status);
-
-
-
-
+void    thinking(t_philos *philo, bool status);
+bool    end_time(t_data *data, int flag);
+void    more_than_one_philo(t_data *data);
+void    set_start_time(t_philos *philo);
 
 
  

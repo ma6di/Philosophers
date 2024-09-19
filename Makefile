@@ -1,5 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Werror -Wextra
+SANITIZE = -fsanitize=thread
 
 # Target executable
 NAME = philo
@@ -14,10 +15,22 @@ OBJS = $(SRCS:.c=.o)
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) -o $(NAME) $(OBJS)
 
+# Compile with Thread Sanitizer
+tsan: CFLAGS += $(SANITIZE) -g
+tsan: clean $(OBJS)
+	$(CC) $(CFLAGS) -o $(NAME)_tsan $(OBJS)
+
 # Compile the .c files to .o files
 %.o: %.c philosophers.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Clean up build files
 clean:
-	rm -f $(NAME) $(OBJS)
+	rm -f $(NAME) $(NAME)_tsan $(OBJS)
+
+# Remove all files, including executables
+fclean: clean
+	rm -f $(NAME)_tsan
+
+# Rebuild the project
+re: fclean $(NAME)
