@@ -18,19 +18,19 @@ void	ft_mutex_init(t_data *data)
 
 	data->forks = malloc(sizeof(t_fork) * data->philo_nbr);
 	if (!data->forks)
-		ft_error("Memory allocation failed for forks", data);
+		ft_error1("Memory allocation failed for forks", data);
 	i = 0;
 	while (i < data->philo_nbr)
 	{
 		if (pthread_mutex_init(&data->forks[i].fork, NULL) != 0)
-			ft_error("Mutex initialization failed for fork", data);
+			ft_error1("Mutex initialization failed for fork", data);
 		data->forks[i].fork_id = i;
 		i++;
 	}
 	if (pthread_mutex_init(&data->data_mutex, NULL) != 0)
-		ft_error("Mutex initialization failed for data_mutex", data);
+		ft_error1("Mutex initialization failed for data_mutex", data);
 	if (pthread_mutex_init(&data->write_mutex, NULL) != 0)
-		ft_error("Mutex initialization failed for write_mutex", data);
+		ft_error1("Mutex initialization failed for write_mutex", data);
 	pthread_mutex_init(&data->end_mutex, NULL);
 }
 
@@ -41,7 +41,7 @@ void	ft_philo_init(t_data *data)
 
 	data->philos = malloc(sizeof(t_philos) * data->philo_nbr);
 	if (!data->philos)
-		ft_error("Memory allocation failed for philosophers", data);
+		ft_error1("Memory allocation failed for philosophers", data);
 	data->end_time = false;
 	data->threads_running_nbr = 0;
 	i = 0;
@@ -55,7 +55,7 @@ void	ft_philo_init(t_data *data)
 		philo->last_meal_time = get_time(MILLISECOND, data); 
 		ft_assign_fork(philo, data->forks, i);
 		if (pthread_mutex_init(&philo->philo_mutex, NULL) != 0)
-			ft_error("Mutex initialization failed - philos mutex", data);
+			ft_error1("Mutex initialization failed - philos mutex", data);
 		i++;
 	}
 }

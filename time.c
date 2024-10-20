@@ -18,7 +18,7 @@ long	get_time(t_time_code time_code, t_data *data)
 	long			time_in_usec;
 
 	if (gettimeofday(&tv, NULL))
-		ft_error("gettimeofday failed", data);
+		ft_error1("gettimeofday failed", data);
 	time_in_usec = (tv.tv_sec * 1000000) + tv.tv_usec;
 	if (time_code == SECOND)
 		return (time_in_usec / 1000000);
@@ -26,7 +26,7 @@ long	get_time(t_time_code time_code, t_data *data)
 		return (time_in_usec / 1000);
 	if (time_code == MICROSECOND)
 		return (time_in_usec);
-	ft_error("wrong input to get_time", data);
+	ft_error1("wrong input to get_time", data);
 	return (-1); 
 }
 

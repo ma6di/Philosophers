@@ -12,7 +12,7 @@
 
 #include "philosophers.h"
 
-static bool	philo_died(t_philos *philo)
+bool	philo_died(t_philos *philo)
 {
 	long	elapsed;
 	long	time_to_die;
@@ -93,10 +93,28 @@ void	clean(t_data *data)
 			pthread_mutex_destroy(&data->forks[i].fork);
 			i++;
 		}
-		free(data->forks);
 		free(data->philos);
+		free(data->forks);
 	}
 	pthread_mutex_destroy(&data->data_mutex);
 	pthread_mutex_destroy(&data->write_mutex);
 	pthread_mutex_destroy(&data->end_mutex);
+	free(data);
+}
+
+void	*monitor_dinner2(void *table)
+{
+	t_data	*data;
+
+	data = (t_data *) table;
+	while (!end_time(data, 0))
+	{
+		if (philo_died(data->philos))
+		{
+			end_time(data, 1);
+			write_status(DIED, data->philos);
+			break ;
+		}
+	}
+	return (NULL);
 }

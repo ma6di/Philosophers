@@ -84,7 +84,7 @@ typedef enum e_status
 	DIED,
 }	t_status;
 
-void	ft_error(const char *error, t_data *data);
+void	ft_error1(const char *error, t_data *data);
 void	input_pars(t_data *data, char **argv, int argc);
 void	ft_int_max(long num);
 void	ft_mutex_init(t_data *data);
@@ -105,5 +105,9 @@ void	thinking(t_philos *philo, bool status);
 bool	end_time(t_data *data, int flag);
 void	more_than_one_philo(t_data *data);
 void	set_start_time(t_philos *philo);
+void	eat(t_philos *philo);
+void	*monitor_dinner2(void *table);
+bool	philo_died(t_philos *philo);
+void	ft_error2(const char *error, t_data *data);
 
 #endif

@@ -1,6 +1,6 @@
-CC = gcc
-CFLAGS = -Wall -Werror -Wextra
-SANITIZE = -fsanitize=thread 
+CC = cc
+CFLAGS = -Wall -Werror -Wextra 
+SANITIZE = -fsanitize=address
 
 # Target executable
 NAME = philo
