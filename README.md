@@ -16,10 +16,10 @@ Eating 🍝 (requires two forks: left and right)
 Sleeping 😴
 
 Constraints:
-A philosopher must pick up both forks to eat.
-Philosophers must not die of starvation.
-Use threads and mutexes only.
-Avoid deadlocks and data races.
+-  A philosopher must pick up both forks to eat.
+-  Philosophers must not die of starvation.
+-  Use threads and mutexes only.
+-  Avoid deadlocks and data races.
 
 🔧 How to Compile & Run
 🧱 Build the program
@@ -30,6 +30,7 @@ Avoid deadlocks and data races.
 📘 Example
   ./philo 5 800 200 200
   This runs a simulation with 5 philosophers:
+  
     - 800ms before dying
     
     - 200ms to eat
@@ -37,6 +38,6 @@ Avoid deadlocks and data races.
     - 200ms to sleep
 
 🧵 Threads & Synchronization
-Each philosopher is a thread.
-Mutexes represent forks (to prevent simultaneous access).
-One monitor thread checks for death conditions.
+  - Each philosopher is a thread.
+  - Mutexes represent forks (to prevent simultaneous access).
+  - One monitor thread checks for death conditions.
