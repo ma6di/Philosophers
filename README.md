@@ -9,11 +9,9 @@ while avoiding common pitfalls like deadlocks, race conditions, and starvation.
 Five philosophers sit at a round table. Each has a plate and a fork to their left and right. 
 They must alternate between:
 
-Thinking 🧠
-
-Eating 🍝 (requires two forks: left and right)
-
-Sleeping 😴
+-  Thinking 🧠
+-  Eating 🍝 (requires two forks: left and right)
+-  Sleeping 😴
 
 Constraints:
 -  A philosopher must pick up both forks to eat.
@@ -32,9 +30,7 @@ Constraints:
   This runs a simulation with 5 philosophers:
   
     - 800ms before dying
-    
     - 200ms to eat
-    
     - 200ms to sleep
 
 🧵 Threads & Synchronization
