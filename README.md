@@ -23,12 +23,14 @@ Avoid deadlocks and data races.
 🧱 Build the program
   - make
   - ./philo [num_of_philosophers] [time_to_die] [time_to_eat] [time_to_sleep] [optional: num_of_times_each_philo_must_eat]
+
+    
 📘 Example
   ./philo 5 800 200 200
   This runs a simulation with 5 philosophers:
-    800ms before dying
-    200ms to eat
-    200ms to sleep
+    - 800ms before dying
+    - 200ms to eat
+    - 200ms to sleep
 
 🧵 Threads & Synchronization
 Each philosopher is a thread.
